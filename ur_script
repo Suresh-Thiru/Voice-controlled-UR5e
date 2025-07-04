@@ -1,0 +1,104 @@
+import socket
+import time
+
+# ====== Configuration ======
+UR_IP = "192.168.1.13"   # IP of UR5e robot
+GRIPPER_PORT = 63352     # Robotiq gripper URCap server port
+ROBOT_PORT = 30002       # UR robot secondary interface port
+
+# ====== Gripper Control ======
+def gripper_set_position(ip, pos):
+    """Send SET POS command to Robotiq gripper URCap server."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as gripper_socket:
+        gripper_socket.connect((ip, GRIPPER_PORT))
+        command = f'SET SPE 255 POS {pos}\n'.encode('utf-8')
+        gripper_socket.sendall(command)
+        response = gripper_socket.recv(1024)
+        print(f'📦 Gripper SET POS {pos} | Response: {response.decode().strip()}')
+
+# ====== UR5e Connection ======
+def connect_to_ur():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((UR_IP, ROBOT_PORT))
+    print(f"✅ Connected to UR5e at {UR_IP}")
+    return s
+
+# ====== Home Position ======
+def go_home(s):
+    print("🏠 Moving to Home Position...")
+    s.send(b"movej(p[0.15, -0.4, 0.5, 0, 3.14, 0], a=1.2, v=0.25)\n")
+    time.sleep(2.5)
+    gripper_set_position(UR_IP, pos=255)
+    time.sleep(1)
+    gripper_set_position(UR_IP, pos=0)  # Open gripper
+
+
+#Bye
+def bye(s):
+    gripper_set_position(UR_IP, pos=0)  # Open gripper
+    time.sleep(1)
+    gripper_set_position(UR_IP, pos=255)
+    time.sleep(1)
+    gripper_set_position(UR_IP, pos=0)  # Open gripper
+    time.sleep(2)
+    gripper_set_position(UR_IP, pos=255)
+
+# ====== Pick Action ======
+def pick_it(s):
+    gripper_set_position(UR_IP, pos=0)
+    time.sleep(1)
+    print("🤖 Moving to Pick Position...")
+    s.send(b"movel(p[0.1, -0.4, 0.4, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(1.5)
+    s.send(b"movel(p[0.1, -0.4, 0.275, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(1)
+    gripper_set_position(UR_IP, pos=255)  # Close gripper
+    s.send(b"set_payload(1.5)\n")
+    time.sleep(1.5)
+    s.send(b"movel(p[0.1, -0.4, 0.4, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(1.5)
+    s.send(b"movej(p[0.15, -0.4, 0.5, 0, 3.14, 0], a=1.2, v=0.25)\n")
+    time.sleep(0.2)
+
+# ====== Place Action ======
+def place_it(s):
+    print("📦 Moving to Place Position...")
+    s.send(b"movej(p[0.3, -0.4, 0.4, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(3)
+    s.send(b"movel(p[0.3, -0.4, 0.275, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(1.5)
+    gripper_set_position(UR_IP, pos=0)  # Open gripper
+    s.send(b"set_payload(0.8)\n")
+    time.sleep(2)
+    s.send(b"movel(p[0.3, -0.4, 0.4, 0, 3.14, 0], a=1.0, v=0.2)\n")
+    time.sleep(1)
+
+# ====== Command Dispatcher ======
+def send_to_ur5e(command):
+    try:
+        s = connect_to_ur()
+
+        if command == "go home":
+            go_home(s)
+        elif command == "pick it":
+            pick_it(s)
+        elif command == "place it":
+            place_it(s)
+        elif command == "bye":
+            bye(s)
+        else:
+            print("⚠️ Unknown command:", command)
+
+        s.close()
+        print("✅ Socket closed.")
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+# Example usage:
+if __name__ == "__main__":
+    send_to_ur5e("go home")
+    send_to_ur5e("pick it")
+    send_to_ur5e("place it")
+    send_to_ur5e("bye")
+
