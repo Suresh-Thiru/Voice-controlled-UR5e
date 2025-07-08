@@ -23,9 +23,9 @@ Watch the robot in action: https://youtu.be/2efVzOwd7k4
 ## 🗂️ Project Structure
 
 voice-ur5e-control/
-1. main.py             # Main loop to control robot with voice
-2. voice_command.py    # Captures and processes voice input
-3. ur_script.py        # Sends URScript commands to UR5e
-4. requirements.txt    # Python dependencies
-5. README.md           # This file
+1. main.py             (Main loop to control robot with voice)
+2. voice_command.py    (Captures and processes voice input)
+3. ur_script.py        (Sends URScript commands to UR5e)
+4. requirements.txt    (Python dependencies)
+5. README.md           (This file)
 
