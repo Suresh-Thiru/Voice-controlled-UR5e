@@ -22,12 +22,10 @@ Watch the robot in action: https://youtu.be/2efVzOwd7k4
 
 ## 🗂️ Project Structure
 
-```bash
 voice-ur5e-control/
 ├── main.py             # Main loop to control robot with voice
 ├── voice_command.py    # Captures and processes voice input
 ├── ur_script.py        # Sends URScript commands to UR5e
 ├── requirements.txt    # Python dependencies
-├── demo.mp4 / image.png (optional)
 └── README.md           # This file
 
