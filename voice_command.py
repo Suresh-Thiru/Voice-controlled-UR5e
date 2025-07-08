@@ -19,27 +19,27 @@ def recognize_command():
     mic = sr.Microphone()
 
     with mic as source:
-        print("🎙️ Listening for a command (say: Pick it, Place it, Bye, or Go Home)...")
+        print("Listening for a command (say: Pick it, Place it, Bye, or Go Home)...")
         recognizer.adjust_for_ambient_noise(source, duration=0.2)
         audio = recognizer.listen(source)
 
     try:
         command = recognizer.recognize_google(audio).lower()
-        print(f"🗣️ Raw input: {command}")
+        print(f"Raw input: {command}")
         mapped_command = map_command(command)
 
         if mapped_command:
-            print(f"✅ Mapped command: {mapped_command}")
+            print(f"Mapped command: {mapped_command}")
             return mapped_command
         else:
-            print("❌ Unrecognized command.")
+            print("Unrecognized command.")
             return None
 
     except sr.UnknownValueError:
-        print("❌ Could not understand audio.")
+        print("Could not understand audio.")
         return None
     except sr.RequestError as e:
-        print(f"❌ API error: {e}")
+        print(f"API error: {e}")
         return None
 
 # Run this function to test
